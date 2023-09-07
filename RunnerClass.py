@@ -90,12 +90,12 @@ class Runner(BamClass):
             self.index_bam(matched_bam)
             if self.mutation_type == 'SNV':
                 SnvClass(self.args, matched_bam)
-                self.sort_bam('./TMP/temp_out.bam', './TMP/temp_out_sorted.bam')
-                command = f'rm ./TMP/temp_out.bam; mv ./TMP/temp_out_sorted.bam ./TMP/chr_{chr_name}_matched.bam'
-                subprocess.run(command, shell=True)
             else:
                 breakpoint()
                 CnvClass(self.args, matched_bam)
+            self.sort_bam('./TMP/temp_out.bam', './TMP/temp_out_sorted.bam')
+            command = f'rm ./TMP/temp_out.bam; mv ./TMP/temp_out_sorted.bam ./TMP/chr_{chr_name}_matched.bam'
+            subprocess.run(command, shell=True)
 
     @log_function_name
     def merge_bam(self):
