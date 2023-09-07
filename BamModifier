@@ -1,7 +1,21 @@
 import argparse
-from BamClass import *
+from RunnerClass import Runner
+import time
 
 
+def timeit(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"{func.__name__} took {elapsed_time:.4f} seconds to run.")
+        return result
+
+    return wrapper
+
+
+@timeit
 def main():
     parser = argparse.ArgumentParser(description="Run modification of bam file")
     parser.add_argument("--mutation_file", help="File with mutations to insert, bam-like file")
@@ -10,7 +24,7 @@ def main():
     parser.add_argument("--threads", help="Num of threads")
     args = parser.parse_args()
 
-    BamClass(args)
+    Runner(args)
 
 
 if __name__ == "__main__":
