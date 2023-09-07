@@ -1,0 +1,17 @@
+import argparse
+from BamClass import *
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run modification of bam file")
+    parser.add_argument("--mutation_file", help="File with mutations to insert, bam-like file")
+    parser.add_argument("--mutation_type", help="SNV or CNV")
+    parser.add_argument("--bam_file", help="Location of bam file")
+    parser.add_argument("--threads", help="Num of threads")
+    args = parser.parse_args()
+
+    BamClass(args)
+
+
+if __name__ == "__main__":
+    main()
