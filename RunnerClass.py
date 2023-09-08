@@ -75,7 +75,11 @@ class Runner(BamClass):
             if len(chrom_subset) == 0:
                 raise NameError('Check chromosome names!!')
             if self.mutation_type == 'SNV':
-                start, stop = chrom_subset['position'].min(), chrom_subset['position'].max()
+                for snip_num in chrom_subset.index:
+                    mut_site = snp_subset.loc[snip_num, "position"]
+                    start, stop = mut_site, mut_site + 1
+                    bed_string += [f'{chr_name}    {start}    {stop}']
+                bed_string = "\n".join(bed_string)
             else:
                 assert self.mutation_type == 'CNV', 'Mutation type MUST be one of: SNV or CNV!'
                 positions = chrom_subset['position'].values.tolist() + chrom_subset['position_end'].values.tolist()
