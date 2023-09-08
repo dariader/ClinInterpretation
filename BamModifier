@@ -21,7 +21,12 @@ def main():
     parser.add_argument("--mutation_file", help="File with mutations to insert, bam-like file")
     parser.add_argument("--mutation_type", help="SNV or CNV")
     parser.add_argument("--bam_file", help="Location of bam file")
-    parser.add_argument("--threads", help="Num of threads")
+    parser.add_argument("--threads", type=int, help="Num of threads")
+    parser.add_argument("--start", const=0, type=int, help="Integer. Start from stage <number>, default - from the "
+                                                           "beginning (0). 1 -- start from splitting bam, "
+                                                           "skip bam sorting and indexing; 2 -- start from select "
+                                                           "region of interest; 3 -- start from insert modification; "
+                                                           "4 -- start from bam merging ")
     args = parser.parse_args()
 
     Runner(args)

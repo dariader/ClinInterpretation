@@ -29,12 +29,16 @@ class Runner(BamClass):
         # self.bam_file.close()
 
     def run_pipeline(self):
-        # self.sort_bam(self.sorted_bam_file_name, self.sorted_bam_file_name)
-        # self.index_bam(self.sorted_bam_file_name)
         self.get_chrom_names()
-        #self.split_bam()
-        self.select_roi()
-        self.insert_modification()
+        if self.args.start < 1:  # if start == 1 -- start from bam splitting and skip these lines:
+            self.sort_bam(self.sorted_bam_file_name, self.sorted_bam_file_name)
+            self.index_bam(self.sorted_bam_file_name)
+        if self.args.start < 2:  # if start == 2 -- start from bam select region of interest and skip these lines:
+            self.split_bam()
+        if self.args.start < 3:  # if start == 3 -- start from bam insert modification and skip these lines:
+            self.select_roi()
+        if self.args.start < 4:  # if start == 4 -- start from bam merging and skip these lines:
+            self.insert_modification()
         self.merge_bam()
         self.index_bam(f'{self.bam_file.strip("bam")}.edited.bam')
 
@@ -50,7 +54,7 @@ class Runner(BamClass):
 
     @log_function_name
     def get_chrom_names(self):
-        command = f"samtools idxstats {self.sorted_bam_file_name} | cut -f1"
+        command = f"samtools idxstats {self.bam_file} | cut -f1"
         self.chrom_names = subprocess.run(command, capture_output=True, shell=True).stdout.decode().split('\n')
 
     @log_function_name
