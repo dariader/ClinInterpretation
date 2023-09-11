@@ -164,9 +164,28 @@ def long_insert_pair(samfile_input, chr_name, start, stop, counter,
 
 
 def insertion(samfile_input, samfile_output, chr_name, start, stop):
-    pass
-    # coverage_upper()
-    # print(samfile_input.count_coverage(chr_name, start, stop, read_callback="nofilter"))
+    reads = samfile_input.fetch(chr_name, start, stop + 1)
+    for read in reads:
+        if read.reference_start < start:
+            samfile_output.write(read)
+        elif read.reference_end is None:
+            if (read.reference_start + read.query_length - 1) > stop:
+                samfile_output.write(read)
+            else:
+                if np.random.choice([0, 1], size=1) == 0:
+                    samfile_output.write(read)
+                else:
+                    samfile_output.write(read)
+                    samfile_output.write(read)
+        elif read.reference_end > stop:
+            samfile_output.write(read)
+        else:
+            if np.random.choice([0, 1], size=1) == 0:
+                samfile_output.write(read)
+            else:
+                samfile_output.write(read)
+                samfile_output.write(read)
+
 
 
 def deletion(samfile_input, samfile_output, chr_name, start, stop, mode="hetero",
