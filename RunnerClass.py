@@ -28,10 +28,12 @@ class Runner(BamClass):
         self.run_pipeline()
         # self.bam_file.close()
 
+    # todo: make assert mutationfile names == bam names
+
     def run_pipeline(self):
         self.get_chrom_names()
         if self.args.start < 1:  # if start == 1 -- start from bam splitting and skip these lines:
-            self.sort_bam(self.sorted_bam_file_name, self.sorted_bam_file_name)
+            self.sort_bam(self.bam_file, self.sorted_bam_file_name)
             self.index_bam(self.sorted_bam_file_name)
         if self.args.start < 2:  # if start == 2 -- start from bam select region of interest and skip these lines:
             self.split_bam()
@@ -39,8 +41,9 @@ class Runner(BamClass):
             self.select_roi()
         if self.args.start < 4:  # if start == 4 -- start from bam merging and skip these lines:
             self.insert_modification()
-        self.merge_bam()
-        self.index_bam(f'{self.bam_file.strip("bam")}.edited.bam')
+        self.merge_by_chromosome()
+        #self.merge_bam()
+
 
     @log_function_name
     def sort_bam(self, bam, sorted_bam):
@@ -60,7 +63,7 @@ class Runner(BamClass):
     @log_function_name
     def split_bam(self):
         for chr_name in self.chrom_names:
-            if chr_name != '*':  # how to avoid parsing *.bam? add \*.bam?
+            if chr_name != '*':  # TODO: how to avoid parsing *.bam? add \*.bam?
                 command = f'mkdir -p ./TMP; samtools view -b {self.sorted_bam_file_name} {chr_name} -@ {self.threads}> ./TMP/chr_{chr_name}.bam'
                 subprocess.run(command, shell=True)
 
@@ -83,10 +86,10 @@ class Runner(BamClass):
             else:
                 assert self.mutation_type == 'CNV', 'Mutation type MUST be one of: SNV or CNV!'
                 positions = chrom_subset['position'].values.tolist() + chrom_subset['position_end'].values.tolist()
-                start, stop = min(positions), max(positions)
+                start, stop = min(positions)-1, max(positions)-1
             command = (
                 f'echo "{chr_name}    {start}    {stop}" > ./TMP/coords.bed;'
-                f"samtools view --threads {self.threads} -L ./TMP/coords.bed -U ./TMP/chr_{chr_name}_unmatched.bam -o ./TMP/chr_{chr_name}_matched.bam ./TMP/chr_{chr_name}.bam;"
+                f"samtools view -@ {self.threads} -L ./TMP/coords.bed -U ./TMP/chr_{chr_name}_unmatched.bam -o ./TMP/chr_{chr_name}_matched.bam ./TMP/chr_{chr_name}.bam;"
                 f"rm ./TMP/chr_{chr_name}.bam")
             subprocess.run(command, shell=True)
         pass
@@ -99,13 +102,24 @@ class Runner(BamClass):
             if self.mutation_type == 'SNV':
                 SnvClass(self.args, matched_bam)
             else:
-                breakpoint()
                 CnvClass(self.args, matched_bam)
             self.sort_bam('./TMP/temp_out.bam', './TMP/temp_out_sorted.bam')
-            command = f'rm ./TMP/temp_out.bam; mv ./TMP/temp_out_sorted.bam ./TMP/chr_{chr_name}_matched.bam'
+            command = f'mkdir -p ./OUT/; rm ./TMP/temp_out.bam; mv ./TMP/temp_out_sorted.bam ./OUT/chr_{chr_name}_matched.bam'
             subprocess.run(command, shell=True)
 
     @log_function_name
     def merge_bam(self):
-        command = f'samtools merge -f -@ {self.threads} -o {self.bam_file.strip("bam")}.edited.bam ./TMP/chr_*.bam'
+        command = f'samtools merge -f -@ {self.threads} -o {self.bam_file.strip("bam")}.edited.bam ./TMP/chr_*ed.bam'
         subprocess.run(command, shell=True)
+
+    @log_function_name
+    def merge_by_chromosome(self):
+        for chr_name in set(self.mutation_file['chromosome'].values.tolist()):
+            matched_bam = f"./OUT/chr_{chr_name}_matched.bam"
+            unmatched_bam = f"./TMP/chr_{chr_name}_unmatched.bam"
+            self.index_bam(matched_bam)
+            self.index_bam(unmatched_bam)
+            command = f'samtools merge -f -@ {self.threads} -o ./OUT/chr_{chr_name}.edited.bam {matched_bam} {unmatched_bam}'
+            subprocess.run(command, shell=True)
+            self.index_bam(f'./OUT/chr_{chr_name}.edited.bam')
+
