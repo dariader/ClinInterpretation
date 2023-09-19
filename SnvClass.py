@@ -46,7 +46,7 @@ class SnvClass(BamClass):
             else:
                 # Определяем позицию в риде и индекс в csv
                 ind = number_list.index(pos)
-                indq = ind
+                indq = ind - 1   # Minus 1 is from SAM-BAM convertation (where SAM is 1-based and BAM is 0-based)
                 length = 0
                 for cigar_block in rc:
                     if cigar_block[0] in [0, 7, 8]:
@@ -67,7 +67,7 @@ class SnvClass(BamClass):
 
                 # Меняем данные
                 rs = rs[:indq] + snp_subset["nucleotide"].loc[number] + rs[indq + 1:]
-                rq[ind] = snp_subset["quality"].loc[number]
+                rq[indq] = snp_subset["quality"].loc[number]
 
         # Переприсваиваем последовательность и качество
         read.query_sequence = rs
