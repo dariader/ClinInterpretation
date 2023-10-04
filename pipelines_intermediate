@@ -1,0 +1,31 @@
+samtools view first_chrom.bam -@ 8 -L snp_delete.bed -U first_chrom_untarget_snp.bam -o first_chrom_target_snp.bam
+samtools view first_chrom.bam -@ 8 -L snp_delete.bed -M -o first_chrom_target_snp.bam
+samtools index first_chrom_target_snp.bam
+
+samtools cat -@ 8 first_chrom_untarget_snp.bam first_chrom_premod_snp.bam -o first_chrom_mod_snp.bam
+rm first_chrom_target_snp.bam first_chrom_untarget_snp.bam first_chrom_premod_snp.bam first_chrom_target_snp.bam.bai
+samtools sort -@ 8 first_chrom_mod_snp.bam -o first_chrom_mod_snp_sorted.bam
+rm first_chrom_mod_snp.bam
+samtools index -@ 8 first_chrom_mod_snp_sorted.bam
+
+
+samtools view first_chrom.bam -@ 8 -L cnv_delete.bed -U first_chrom_untarget_cnv.bam -o first_chrom_target_cnv.bam
+samtools view first_chrom.bam -@ 8 -L cnv_delete.bed -M -o first_chrom_target_cnv.bam
+samtools index first_chrom_target_cnv.bam
+
+samtools cat -@ 8 first_chrom_untarget_cnv.bam first_chrom_premod_cnv.bam -o first_chrom_mod_cnv.bam
+rm first_chrom_target_cnv.bam first_chrom_untarget_cnv.bam first_chrom_premod_cnv.bam first_chrom_target_cnv.bam.bai
+samtools sort -@ 8 first_chrom_mod_cnv.bam -o first_chrom_mod_cnv_sorted.bam
+rm first_chrom_mod_cnv.bam
+samtools index -@ 8 first_chrom_mod_cnv_sorted.bam
+
+
+samtools view first_chrom.bam -@ 8 -L fs_delete.bed -U first_chrom_untarget_fs.bam -o first_chrom_target_fs.bam
+samtools view first_chrom.bam -@ 8 -L fs_delete.bed -M -o first_chrom_target_fs.bam
+samtools index first_chrom_target_fs.bam
+
+samtools cat -@ 8 first_chrom_untarget_fs.bam first_chrom_premod_fs.bam -o first_chrom_mod_fs.bam
+rm first_chrom_target_fs.bam first_chrom_untarget_fs.bam first_chrom_premod_fs.bam first_chrom_target_fs.bam.bai
+samtools sort -@ 8 first_chrom_mod_fs.bam -o first_chrom_mod_fs_sorted.bam
+rm first_chrom_mod_fs.bam
+samtools index -@ 8 first_chrom_mod_fs_sorted.bam
